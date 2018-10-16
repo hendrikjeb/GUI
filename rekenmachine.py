@@ -3,17 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 
 
-class Rekentoets(tk.Button):
-    """Deze class bouwt een toets en geeft deze een functie mee."""
-    
-    def __init__(self, master=None, *args, toets, x, y):
-        ttk.Button.__init__(self, master)
-        self["text"] = toets
-        self["command"] = lambda: self.master.Calc(toets)
-        self.grid(row=(x+2), column=y, sticky="WENS")
-        self.toets = toets
-
-
 class Rekenmachine(tk.Frame):
     """Deze class bouwt een Rekenmachine. Het venster wordt geïnitialiseerd."""
     def __init__(self, master=None):
@@ -30,28 +19,18 @@ class Rekenmachine(tk.Frame):
         
         self.invoer = tk.StringVar()
         self.uitvoer = tk.StringVar()
+        self.operator = ''
         
         self.uitvoerscherm = ttk.Label(self, textvariable=self.uitvoer)
-        self.uitvoerscherm.grid(column=0, row=0, columnspan=3, sticky="W")
+        self.uitvoerscherm.grid(column=0, row=1, columnspan=2, sticky="W")
         self.invoerscherm = ttk.Label(self, textvariable=self.invoer)
-        self.invoerscherm.grid(column=0, row=1, columnspan=3, sticky="E")
-        self.operator = ''
+        self.invoerscherm.grid(column=2, row=1, columnspan=1, sticky="E")
 
         # maak toetsen om het programma te besturen
-        ttk.Button(self, text='Stop', command=quit).grid(row=0, column=3)
+        # ttk.Button(self, text='Stop', command=quit).grid(row=0, column=3)
         ttk.Button(self, text='Wis', command=self.wissen).grid(row=1, column=3)
 
         # maak alle rekentoetsen
-        self.createButtons()
-
-    def wissen(self):
-        if self.invoer.get() == '':
-            self.uitvoer.set('')
-        else:
-            self.invoer.set('')
-
-    def createButtons(self):
-        # Onderstaande lijst bevat alle toetsen, per rij en per kolom
         self.symbolen = [[7,8,9,'/'],[4,5,6,'x'],[1,2,3,'-'],['.',0,'+','=']]
         self.toetsen = [['' for y in range(4)] for x in range(4)]
         for x in range(4):
@@ -84,19 +63,33 @@ class Rekenmachine(tk.Frame):
                 if self.operator in functies:
                     uitvoer = functies[self.operator](invoer, uitvoer)
                 else:
-                    if invoer[-1] == '.':
-                        invoer = invoer[:-1]
                     uitvoer = invoer
-                    self.operator = ''
                 # zet het resultaat in de uitvoer, maak de invoer leeg 
-                invoer = ''
-                self.uitvoer.set(str(uitvoer))
                 # zet de punt weer op actief
+                self.uitvoer.set(str(uitvoer).strip('0').strip('.'))
+                invoer = ''
                 self.toetsen[3][0]["state"] = "normal"
             self.operator = toets
 
         self.invoer.set(invoer)
-        self.master.focus_set()
+
+    def wissen(self):
+        if self.invoer.get() == '':
+            self.uitvoer.set('')
+        else:
+            self.invoer.set('')
+
+
+class Rekentoets(tk.Button):
+    """Deze class bouwt een toets en geeft deze een functie mee."""
+    
+    def __init__(self, master=None, *args, toets, x, y):
+        ttk.Button.__init__(self, master)
+        self["text"] = toets
+        self["command"] = lambda: self.master.Calc(toets)
+        self.grid(row=(x+2), column=y, sticky="WENS")
+        self.toets = toets
+
 
 def fPlus(invoer, uitvoer):
     try:
@@ -137,8 +130,11 @@ def tCalc(Event):
     elif Event.keysym == "Delete":
         rm.wissen()
     elif Event.keysym == "BackSpace":
-        if rm.invoer.get() != '':
-            rm.invoer.set(rm.invoer.get()[:-1])
+        invoer = rm.invoer.get()
+        if invoer != '':
+            if invoer[-1] == '.':
+                rm.toetsen[3][0]["state"] = "normal"
+            rm.invoer.set(invoer[:-1])
     else:
         # print(Event)
         pass
