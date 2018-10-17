@@ -66,7 +66,11 @@ class Rekenmachine(tk.Frame):
                     uitvoer = invoer
                 # zet het resultaat in de uitvoer, maak de invoer leeg 
                 # zet de punt weer op actief
-                self.uitvoer.set(str(uitvoer).strip('0').strip('.'))
+                # haal eventueel overbodige nullen en de punt weg
+                if '.' in str(uitvoer):
+                    self.uitvoer.set(str(uitvoer).rstrip('0').strip('.'))
+                else:
+                    self.uitvoer.set(str(uitvoer))
                 invoer = ''
                 self.toetsen[3][0]["state"] = "normal"
             self.operator = toets
